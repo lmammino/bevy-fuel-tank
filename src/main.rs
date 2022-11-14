@@ -16,6 +16,7 @@ fn main() {
         .add_startup_system(setup)
         .add_startup_system(spawn_ship)
         .add_startup_system(spawn_hud)
+        .add_startup_system(spawn_fuel_cells)
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldInspectorPlugin::new())
