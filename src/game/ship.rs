@@ -1,5 +1,7 @@
-use crate::game::Velocity;
+use crate::game::{FuelCell, Velocity};
 use bevy::prelude::*;
+
+const SHIP_SIZE: f32 = 32.0;
 
 #[derive(Reflect, Component, Default)]
 #[reflect(Component)]
@@ -11,6 +13,7 @@ pub struct Starship {
 #[reflect(Component)]
 pub struct Engine {
     pub fuel: f32,
+    pub capacity: f32,
     pub thrust: f32,
     pub is_on: bool,
 }
@@ -25,8 +28,14 @@ pub fn spawn_ship(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let texture_handle = asset_server.load("ship.png");
-    let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 2, 2, None, None);
+    let texture_atlas = TextureAtlas::from_grid(
+        texture_handle,
+        Vec2::new(SHIP_SIZE, SHIP_SIZE),
+        2,
+        2,
+        None,
+        None,
+    );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     commands
@@ -48,6 +57,7 @@ pub fn spawn_ship(
             Velocity { x: 0.0, y: 0.0 },
             Engine {
                 fuel: 1000.0,
+                capacity: 1000.0,
                 thrust: 100.0,
                 is_on: false,
             },
@@ -111,6 +121,25 @@ pub fn animate_sprite(
 
         if !engine.is_on {
             sprite.index = 0;
+        }
+    }
+}
+
+pub fn collide_with_fuel_system(
+    mut commands: Commands,
+    mut fuel_query: Query<(Entity, &Transform, &FuelCell)>,
+    mut ship_query: Query<(&Transform, &mut Engine), With<Starship>>,
+) {
+    let (ship_transform, mut engine) = ship_query.single_mut();
+
+    for (fuel_entity, fuel_transform, fuel_cell) in fuel_query.iter_mut() {
+        let distance = ship_transform
+            .translation
+            .distance(fuel_transform.translation);
+        if distance < SHIP_SIZE / 2.0 {
+            engine.fuel += fuel_cell.capacity;
+            engine.fuel = engine.fuel.clamp(0.0, engine.capacity);
+            commands.entity(fuel_entity).despawn();
         }
     }
 }

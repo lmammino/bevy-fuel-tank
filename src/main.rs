@@ -30,5 +30,7 @@ fn main() {
         .add_system(engine_system)
         .add_system(animate_sprite)
         .add_system(fuel_text_system)
+        .add_system(collide_with_fuel_system)
+        .add_system(fuel_cells_collision_system)
         .run()
 }
