@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::{Inspectable, RegisterInspectable, WorldInspectorPlugin};
+use bevy_prototype_lyon::prelude::*;
 
 mod game;
 use game::*;
@@ -17,8 +18,10 @@ fn main() {
         .add_startup_system(spawn_ship)
         .add_startup_system(spawn_hud)
         .add_startup_system(spawn_fuel_cells)
+        .add_startup_system(spawn_asteroids)
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins(DefaultPlugins)
+        .add_plugin(ShapePlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .register_inspectable::<InspectableType>()
         .register_type::<Starship>()
@@ -32,5 +35,6 @@ fn main() {
         .add_system(fuel_text_system)
         .add_system(collide_with_fuel_system)
         .add_system(fuel_cells_collision_system)
+        .add_system(collide_with_asteroid)
         .run()
 }

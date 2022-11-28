@@ -1,7 +1,9 @@
+mod asteroid;
 mod common;
 mod fuel;
 mod hud;
 mod ship;
+pub use asteroid::*;
 pub use common::*;
 pub use fuel::*;
 pub use hud::*;

@@ -35,7 +35,8 @@ pub fn fuel_text_system(
     mut query_text: Query<&mut Text, With<FuelStatusText>>,
     query_starship_engine: Query<&Engine, With<Starship>>,
 ) {
-    let mut text = query_text.single_mut();
-    let engine = query_starship_engine.single();
-    text.sections[1].value = format!("{:.0}", engine.fuel);
+    if let Ok(engine) = query_starship_engine.get_single() {
+        let mut text = query_text.single_mut();
+        text.sections[1].value = format!("{:.0}", engine.fuel);
+    }
 }

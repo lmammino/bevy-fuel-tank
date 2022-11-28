@@ -53,10 +53,7 @@ pub fn spawn_fuel_cells(
                     capacity: rand::random::<f32>() * 10.0 + 10.0, // 10..20
                     has_spawn_children: false,
                 },
-                Velocity {
-                    x: rand::random::<f32>() * 20.0 - 10.0, // -10..10
-                    y: rand::random::<f32>() * 20.0 - 10.0, // -10..10
-                },
+                Velocity::rand(),
             ));
     }
 }

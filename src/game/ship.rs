@@ -1,6 +1,8 @@
 use crate::game::{FuelCell, Velocity};
 use bevy::prelude::*;
 
+use crate::Asteroid;
+
 const SHIP_SIZE: f32 = 32.0;
 
 #[derive(Reflect, Component, Default)]
@@ -70,13 +72,14 @@ pub fn rotate_ship_system(
     mut query: Query<(&mut Transform, &Starship)>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    let (mut transform, starship) = query.single_mut();
-
-    if keyboard_input.pressed(KeyCode::Left) {
-        transform.rotation *= Quat::from_rotation_z(time.delta_seconds() * starship.rotation_speed);
-    } else if keyboard_input.pressed(KeyCode::Right) {
-        transform.rotation *=
-            Quat::from_rotation_z(time.delta_seconds() * -starship.rotation_speed);
+    if let Ok((mut transform, starship)) = query.get_single_mut() {
+        if keyboard_input.pressed(KeyCode::Left) {
+            transform.rotation *=
+                Quat::from_rotation_z(time.delta_seconds() * starship.rotation_speed);
+        } else if keyboard_input.pressed(KeyCode::Right) {
+            transform.rotation *=
+                Quat::from_rotation_z(time.delta_seconds() * -starship.rotation_speed);
+        }
     }
 }
 
@@ -130,16 +133,32 @@ pub fn collide_with_fuel_system(
     mut fuel_query: Query<(Entity, &Transform, &FuelCell)>,
     mut ship_query: Query<(&Transform, &mut Engine), With<Starship>>,
 ) {
-    let (ship_transform, mut engine) = ship_query.single_mut();
+    if let Ok((ship_transform, mut engine)) = ship_query.get_single_mut() {
+        for (fuel_entity, fuel_transform, fuel_cell) in fuel_query.iter_mut() {
+            let distance = ship_transform
+                .translation
+                .distance(fuel_transform.translation);
+            if distance < SHIP_SIZE / 2.0 {
+                engine.fuel += fuel_cell.capacity;
+                engine.fuel = engine.fuel.clamp(0.0, engine.capacity);
+                commands.entity(fuel_entity).despawn();
+            }
+        }
+    }
+}
 
-    for (fuel_entity, fuel_transform, fuel_cell) in fuel_query.iter_mut() {
-        let distance = ship_transform
-            .translation
-            .distance(fuel_transform.translation);
-        if distance < SHIP_SIZE / 2.0 {
-            engine.fuel += fuel_cell.capacity;
-            engine.fuel = engine.fuel.clamp(0.0, engine.capacity);
-            commands.entity(fuel_entity).despawn();
+pub fn collide_with_asteroid(
+    mut commands: Commands,
+    mut asteroid_query: Query<&Transform, With<Asteroid>>,
+    mut ship_query: Query<(Entity, &Transform), With<Starship>>,
+) {
+    if let Ok((ship, ship_transform)) = ship_query.get_single_mut() {
+        for asteroid in asteroid_query.iter_mut() {
+            let distance = ship_transform.translation.distance(asteroid.translation);
+            if distance < super::asteroid::MAX_RADIUS + (SHIP_SIZE / 2.0) {
+                println!("BOOM");
+                commands.entity(ship).despawn();
+            }
         }
     }
 }

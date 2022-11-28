@@ -7,6 +7,15 @@ pub struct Velocity {
     pub y: f32,
 }
 
+impl Velocity {
+    pub fn rand() -> Self {
+        Velocity {
+            x: rand::random::<f32>() * 20.0 - 10.0, // -10..10
+            y: rand::random::<f32>() * 20.0 - 10.0, // -10..10
+        }
+    }
+}
+
 pub fn velocity_system(
     time: Res<Time>,
     mut query: Query<(&mut Transform, &Velocity)>,
