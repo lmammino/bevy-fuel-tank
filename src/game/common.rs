@@ -1,5 +1,13 @@
 use bevy::prelude::*;
 
+pub struct CommonComponentsPlugin;
+
+impl Plugin for CommonComponentsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system(velocity_system);
+    }
+}
+
 #[derive(Reflect, Component, Default)]
 #[reflect(Component)]
 pub struct Velocity {
@@ -16,7 +24,7 @@ impl Velocity {
     }
 }
 
-pub fn velocity_system(
+fn velocity_system(
     time: Res<Time>,
     mut query: Query<(&mut Transform, &Velocity)>,
     windows: Res<Windows>,

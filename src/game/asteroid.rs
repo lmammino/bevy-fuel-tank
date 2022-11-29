@@ -2,6 +2,14 @@ use crate::Velocity;
 use bevy::prelude::*;
 use bevy_prototype_lyon::{prelude::*, shapes::Polygon};
 
+pub struct AsteroidPlugin;
+
+impl Plugin for AsteroidPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_asteroids_system);
+    }
+}
+
 #[derive(Reflect, Component, Default)]
 #[reflect(Component)]
 pub struct Asteroid;
@@ -27,7 +35,7 @@ fn generate_rnd_shape() -> Polygon {
     }
 }
 
-pub fn spawn_asteroids(mut commands: Commands) {
+fn spawn_asteroids_system(mut commands: Commands) {
     for _ in 0..10 {
         let shape = generate_rnd_shape();
         commands
