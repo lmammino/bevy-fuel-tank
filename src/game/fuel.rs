@@ -3,6 +3,15 @@ use bevy::{prelude::*, sprite::collide_aabb};
 
 const FUEL_CELL_SIZE: f32 = 8.0;
 
+pub struct FuelPlugin;
+
+impl Plugin for FuelPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_fuel_cells_system)
+            .add_system(fuel_cells_collision_system);
+    }
+}
+
 #[derive(Reflect, Component, Default)]
 #[reflect(Component)]
 pub struct FuelCell {
@@ -10,7 +19,7 @@ pub struct FuelCell {
     pub has_spawn_children: bool,
 }
 
-pub fn spawn_fuel_cells(
+fn spawn_fuel_cells_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -58,7 +67,7 @@ pub fn spawn_fuel_cells(
     }
 }
 
-pub fn fuel_cells_collision_system(
+fn fuel_cells_collision_system(
     mut commands: Commands,
     mut fuel_cells_query: Query<(
         &Handle<TextureAtlas>,

@@ -1,9 +1,20 @@
-use crate::game::{FuelCell, Velocity};
+use crate::game::{asteroid, Asteroid, FuelCell, Velocity};
 use bevy::prelude::*;
 
-use crate::Asteroid;
-
 const SHIP_SIZE: f32 = 32.0;
+
+pub struct ShipPlugin;
+
+impl Plugin for ShipPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_ship_system)
+            .add_system(rotate_ship_system)
+            .add_system(engine_system)
+            .add_system(animate_sprite_system)
+            .add_system(collide_with_fuel_system)
+            .add_system(collide_with_asteroid_system);
+    }
+}
 
 #[derive(Reflect, Component, Default)]
 #[reflect(Component)]
@@ -24,7 +35,7 @@ pub struct Engine {
 #[reflect(Component)]
 pub struct AnimationTimer(Timer);
 
-pub fn spawn_ship(
+fn spawn_ship_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -67,7 +78,7 @@ pub fn spawn_ship(
         ));
 }
 
-pub fn rotate_ship_system(
+fn rotate_ship_system(
     time: Res<Time>,
     mut query: Query<(&mut Transform, &Starship)>,
     keyboard_input: Res<Input<KeyCode>>,
@@ -83,7 +94,7 @@ pub fn rotate_ship_system(
     }
 }
 
-pub fn engine_system(
+fn engine_system(
     time: Res<Time>,
     mut query: Query<(&mut Velocity, &Transform, &mut Engine)>,
     keyboard_input: Res<Input<KeyCode>>,
@@ -102,7 +113,7 @@ pub fn engine_system(
     }
 }
 
-pub fn animate_sprite(
+fn animate_sprite_system(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlas>>,
     mut query: Query<(
@@ -128,7 +139,7 @@ pub fn animate_sprite(
     }
 }
 
-pub fn collide_with_fuel_system(
+fn collide_with_fuel_system(
     mut commands: Commands,
     mut fuel_query: Query<(Entity, &Transform, &FuelCell)>,
     mut ship_query: Query<(&Transform, &mut Engine), With<Starship>>,
@@ -147,7 +158,7 @@ pub fn collide_with_fuel_system(
     }
 }
 
-pub fn collide_with_asteroid(
+fn collide_with_asteroid_system(
     mut commands: Commands,
     mut asteroid_query: Query<&Transform, With<Asteroid>>,
     mut ship_query: Query<(Entity, &Transform), With<Starship>>,
@@ -155,7 +166,7 @@ pub fn collide_with_asteroid(
     if let Ok((ship, ship_transform)) = ship_query.get_single_mut() {
         for asteroid in asteroid_query.iter_mut() {
             let distance = ship_transform.translation.distance(asteroid.translation);
-            if distance < super::asteroid::MAX_RADIUS + (SHIP_SIZE / 2.0) {
+            if distance < asteroid::MAX_RADIUS + (SHIP_SIZE / 2.0) {
                 println!("BOOM");
                 commands.entity(ship).despawn();
             }

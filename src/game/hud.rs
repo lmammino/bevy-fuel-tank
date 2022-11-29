@@ -1,10 +1,19 @@
 use crate::game::{Engine, Starship};
 use bevy::prelude::*;
 
+pub struct HudPlugin;
+
+impl Plugin for HudPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_hud_system)
+            .add_system(fuel_text_system);
+    }
+}
+
 #[derive(Component)]
 pub struct FuelStatusText;
 
-pub fn spawn_hud(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_hud_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/Monocraft.otf");
 
     // spawn the fuel status text
@@ -31,7 +40,7 @@ pub fn spawn_hud(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-pub fn fuel_text_system(
+fn fuel_text_system(
     mut query_text: Query<&mut Text, With<FuelStatusText>>,
     query_starship_engine: Query<&Engine, With<Starship>>,
 ) {
